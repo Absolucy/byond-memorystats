@@ -1,0 +1,6 @@
+/target
+Cargo.lock
+
+tests/dm/*
+!tests/dm/test.dm
+!tests/dm/test.dme

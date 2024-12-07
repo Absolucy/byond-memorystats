@@ -1,0 +1,62 @@
+name: Build Binaries
+on:
+    push:
+        paths-ignore:
+            - 'tests/**'
+            - '.editorconfig'
+            - '.gitattributes'
+            - '.gitignore'
+            - '.rustfmt.toml'
+    pull_request:
+        paths-ignore:
+            - 'tests/**'
+            - '.editorconfig'
+            - '.gitattributes'
+            - '.gitignore'
+            - '.rustfmt.toml'
+    workflow_dispatch:
+jobs:
+    build:
+        name: Build Releases
+        runs-on: ${{ matrix.os.runner }}
+        strategy:
+            matrix:
+                os:
+                    - name: linux
+                      runner: ubuntu-latest
+                      target: i686-unknown-linux-gnu
+                    - name: windows
+                      runner: windows-latest
+                      target: i686-pc-windows-msvc
+        concurrency:
+            group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os.name }}
+            cancel-in-progress: true
+        steps:
+            - uses: actions/checkout@v4
+            - name: Setup Rust toolchain
+              uses: actions-rust-lang/setup-rust-toolchain@v1
+              with:
+                  target: ${{ matrix.os.target }}
+            - name: Install dependencies (Linux)
+              if: ${{ matrix.os.name == 'linux' }}
+              run: |
+                  sudo dpkg --add-architecture i386
+                  sudo apt-get -y update
+                  sudo apt-get -y install libgcc-s1:i386 g++-multilib
+            - name: Setup sccache
+              uses: mozilla-actions/sccache-action@v0.0.6
+            - name: Build
+              run: cargo build --release --target "${{ matrix.os.target }}"
+              env:
+                  PKG_CONFIG_ALLOW_CROSS: 1
+                  SCCACHE_GHA_ENABLED: "true"
+                  RUSTC_WRAPPER: "sccache"
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: memorystats-${{ matrix.os.name }}
+                  if-no-files-found: error
+                  path: |
+                      target/${{ matrix.os.target }}/release/memorystats.dll
+                      target/${{ matrix.os.target }}/release/memorystats.pdb
+                      target/${{ matrix.os.target }}/release/libmemorystats.so
