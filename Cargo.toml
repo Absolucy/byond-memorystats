@@ -11,10 +11,19 @@ publish = false
 name = "memorystats"
 crate-type = ["cdylib"]
 
+[dependencies]
+cfg-if = "1"
+libloading = "0.8"
+
+[target.'cfg(windows)'.dependencies]
+vc-ltl = "5.2.1-Beta3"
+
 [build-dependencies]
 cc = "1"
 
 [profile.release]
-lto = "fat"
+opt-level = "s"
+lto = "thin"
 codegen-units = 1
 overflow-checks = false
+strip = true

@@ -1,26 +1,22 @@
 // SPDX-License-Identifier: MPL-2.0
 use crate::dmstring::DMString;
 
-unsafe extern "thiscall" {
-	#[cfg_attr(windows, link_name = "??0DMString@@QAE@XZ")]
-	#[cfg_attr(target_os = "linux", link_name = "_ZN8DMStringC2Ev")]
-	/// DMString::DMString();
-	pub fn dm_string_new(this: *mut DMString) -> *mut DMString;
-	#[cfg_attr(windows, link_name = "??1DMString@@QAE@XZ")]
-	#[cfg_attr(target_os = "linux", link_name = "_ZN8DMStringD2Ev")]
-	/// DMString::~DMString();
-	pub fn dm_string_free(this: *mut DMString);
-}
+pub type DmStringNew = unsafe extern "thiscall" fn(this: *mut DMString) -> *mut DMString;
+pub type DmStringFree = unsafe extern "thiscall" fn(this: *mut DMString);
+pub type GetServerMemUsage = unsafe extern "stdcall" fn(out: *mut DMString);
 
-unsafe extern "stdcall" {
-	#[cfg_attr(
-		windows,
-		link_name = "?GetServerMemUsage@DungServer@@QAE?AUDMString@@XZ"
-	)]
-	#[cfg_attr(
-		target_os = "linux",
-		link_name = "_ZN10DungServer17GetServerMemUsageEv"
-	)]
-	/// DungServer::GetServerMemUsage(DMString *out)
-	pub fn get_server_mem_usage(out: *mut DMString);
+cfg_if::cfg_if! {
+	if #[cfg(windows)] {
+		pub const BYONDCORE: &str = "byondcore.dll";
+		pub const DMSTRING_NEW_SYMBOL: &[u8] = c"??0DMString@@QAE@XZ".to_bytes_with_nul();
+		pub const DMSTRING_FREE_SYMBOL: &[u8] = c"??1DMString@@QAE@XZ".to_bytes_with_nul();
+		pub const GET_SERVER_MEM_USAGE_SYMBOL: &[u8] =
+			c"?GetServerMemUsage@DungServer@@QAE?AUDMString@@XZ".to_bytes_with_nul();
+	} else {
+		pub const BYONDCORE: &str = "libbyond.so";
+		pub const DMSTRING_NEW_SYMBOL: &[u8] = c"_ZN8DMStringC2Ev".to_bytes_with_nul();
+		pub const DMSTRING_FREE_SYMBOL: &[u8] = c"_ZN8DMStringD2Ev".to_bytes_with_nul();
+		pub const GET_SERVER_MEM_USAGE_SYMBOL: &[u8] =
+			c"_ZN10DungServer17GetServerMemUsageEv".to_bytes_with_nul();
+	}
 }

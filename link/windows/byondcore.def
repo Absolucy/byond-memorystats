@@ -1,5 +1,0 @@
-LIBRARY byondcore.dll
-EXPORTS
-    ??0DMString@@QAE@XZ
-    ??1DMString@@QAE@XZ
-    ?GetServerMemUsage@DungServer@@QAE?AUDMString@@XZ

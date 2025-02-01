@@ -1,7 +1,0 @@
-LIBBYOND_1.0 {
-    global:
-        _ZN8DMStringC2Ev;
-        _ZN8DMStringD2Ev;
-        _ZN10DungServer17GetServerMemUsageEv;
-    local: *;
-};

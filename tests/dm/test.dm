@@ -30,6 +30,8 @@
 	if(!output)
 		CRASH("memory_stats output was blank")
 	world.log << "[output]"
+	if(findtext(output, "error: "))
+		CRASH("memory_stats errored: [copytext(output, 8)]")
 	if(!findtext(output, "Server mem usage"))
 		CRASH("Expected string not found: \"Server mem usage\"")
 	if(!findtext(output, "prototypes"))

@@ -37,20 +37,19 @@ jobs:
               uses: actions-rust-lang/setup-rust-toolchain@v1
               with:
                   target: ${{ matrix.os.target }}
+                  toolchain: nightly
+                  components: rust-src
             - name: Install dependencies (Linux)
               if: ${{ matrix.os.name == 'linux' }}
               run: |
                   sudo dpkg --add-architecture i386
                   sudo apt-get -y update
                   sudo apt-get -y install libgcc-s1:i386 g++-multilib
-            - name: Setup sccache
-              uses: mozilla-actions/sccache-action@v0.0.6
             - name: Build
-              run: cargo build --release --target "${{ matrix.os.target }}"
+              run: cargo build --release --target "${{ matrix.os.target }}" -Z build-std -Z build-std-features="optimize_for_size"
               env:
                   PKG_CONFIG_ALLOW_CROSS: 1
-                  SCCACHE_GHA_ENABLED: "true"
-                  RUSTC_WRAPPER: "sccache"
+                  RUSTFLAGS: -Zlocation-detail=none -Zfmt-debug=none
             - name: Upload artifacts
               uses: actions/upload-artifact@v4
               with:
