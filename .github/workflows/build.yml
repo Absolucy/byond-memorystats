@@ -37,7 +37,7 @@ jobs:
               uses: actions-rust-lang/setup-rust-toolchain@v1
               with:
                   target: ${{ matrix.os.target }}
-                  toolchain: nightly
+                  toolchain: stable
                   components: rust-src
             - name: Install dependencies (Linux)
               if: ${{ matrix.os.name == 'linux' }}
@@ -49,6 +49,7 @@ jobs:
               run: cargo build --release --target "${{ matrix.os.target }}" -Z build-std -Z build-std-features="optimize_for_size"
               env:
                   PKG_CONFIG_ALLOW_CROSS: 1
+                  RUSTC_BOOTSTRAP: 1
                   RUSTFLAGS: -Zlocation-detail=none -Zfmt-debug=none
             - name: Upload artifacts
               uses: actions/upload-artifact@v4
