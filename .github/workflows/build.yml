@@ -15,6 +15,8 @@ on:
             - '.gitignore'
             - '.rustfmt.toml'
     workflow_dispatch:
+env:
+    CARGO_TERM_COLOR: always
 jobs:
     build:
         name: Build Releases
@@ -60,3 +62,21 @@ jobs:
                       target/${{ matrix.os.target }}/release/memorystats.dll
                       target/${{ matrix.os.target }}/release/memorystats.pdb
                       target/${{ matrix.os.target }}/release/libmemorystats.so
+    publish-release:
+        name: Publish Release
+        runs-on: ubuntu-latest
+        needs: [build]
+        if: startsWith(github.ref, 'refs/tags/')
+        permissions:
+            contents: write
+        steps:
+            - name: Download Previous Artifacts
+              uses: actions/download-artifact@v4
+            - name: Publish Release
+              uses: softprops/action-gh-release@v2
+              with:
+                fail_on_unmatched_files: true
+                files: |
+                    memorystats-windows/memorystats.dll
+                    memorystats-windows/memorystats.pdb
+                    memorystats-linux/libmemorystats.so
