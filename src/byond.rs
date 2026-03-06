@@ -1,8 +1,17 @@
 // SPDX-License-Identifier: MPL-2.0
 use crate::dmstring::DMString;
+use cfg_if::cfg_if;
 
-pub type DmStringNew = unsafe extern "thiscall" fn(this: *mut DMString) -> *mut DMString;
-pub type DmStringFree = unsafe extern "thiscall" fn(this: *mut DMString);
+cfg_if! {
+	if #[cfg(windows)] {
+		pub type DmStringNew = unsafe extern "thiscall" fn(this: *mut DMString) -> *mut DMString;
+		pub type DmStringFree = unsafe extern "thiscall" fn(this: *mut DMString);
+	} else {
+		pub type DmStringNew = unsafe extern "cdecl" fn(this: *mut DMString);
+		pub type DmStringFree = unsafe extern "cdecl" fn(this: *mut DMString);
+	}
+}
+
 pub type GetServerMemUsage = unsafe extern "stdcall" fn(out: *mut DMString);
 
 cfg_if::cfg_if! {
